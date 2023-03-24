@@ -6,6 +6,7 @@ function setupStartNewAnsible () {
 
     mkdir memcached_socket redis_socket && \
     chmod 777 memcached_socket && chmod 777 redis_socket
+    cp credentials.py.ori credentials.py
     echo -n "Server IP run postgres AWX: "
     read ipAWX
     sed -i "s/ansible-run-postgres/$ipAWX/g" credentials.py
@@ -15,11 +16,26 @@ function setupStartNewAnsible () {
 }
 
 function getBackupZipfile () {
+    echo "############# Download latest backupfile from FTPD##########"
+
+    checkConnection=$(nc -zv ftpd-backup.nexdev.net 2023 -w 1  > /dev/null 2>&1)
+    
+    if [[ $? -ne 0 ]]; then
+        echo "Fail to connect FTP Server!!!"
+        exit 1
+    fi
+
+    echo -n "Username ftpd: "
+    read ftpdUser
+    echo -n "Password ftpd: "
+    read -s ftpdPass
+    echo
     echo -n "Which env get backupfile [nexprod]: "
     read env
     env=${env:-"nexprod"}
-    echo $env
-    cp getfile-ori.py getLatestbackupfile.py
+    cp getLatestbackupfile.py.ori getLatestbackupfile.py
+    sed -i "s/ftpd-user/$ftpdUser/g" getLatestbackupfile.py
+    sed -i "s/ftpd-password/$ftpdPass/g" getLatestbackupfile.py
     sed -i "s/envOfBackupFile/$env/g" getLatestbackupfile.py
     python3 getLatestbackupfile.py
     if [[ $? -ne 0 ]]; then
@@ -44,6 +60,10 @@ function restoreAnsible() {
         setupStartNewAnsible
     fi
     
+    until [[ $(docker ps | grep postgres) ]]; do
+        sleep 1
+    done
+
     echo "Waiting 300s AWX Setup Database ..."
     sleep 300
 
@@ -61,8 +81,20 @@ function restoreAnsible() {
     if [[ $? -eq 0 ]]; then
         echo "===================Restore DB AWX Successfuly====================="
     fi
+
+    cleanupAfterRestore
 }
 
+
+function cleanupAfterRestore () {
+    # clean up backup file
+    rm -rf *.tar *.gz
+
+    # cleanup file get latest bk file
+    rm -rf getLatestbackupfile.py
+
+    echo "Done clean-up !!!"
+}
 
 
 echo  "Enter your choice to deploy Ansible
