@@ -14,16 +14,28 @@ function setupStartNewAnsible () {
     echo "===========Done Install AWX===================="
 }
 
+function getBackupZipfile () {
+    echo -n "Which env get backupfile [nexprod]: "
+    read env
+    env=${env:-"nexprod"}
+    echo $env
+    cp getfile-ori.py getLatestbackupfile.py
+    sed -i "s/envOfBackupFile/$env/g" getLatestbackupfile.py
+    python3 getLatestbackupfile.py
+    if [[ $? -ne 0 ]]; then
+        exit 1
+    fi
+}
+
 
 function installNewAnsible () {
     setupStartNewAnsible
 }
 
 function restoreAnsible() {
+    getBackupZipfile
     zipFileBackupAnsible=$(ls | grep -E "*.gz")
-    if [ ! -f "$zipFileBackupAnsible" ]; then
-        echo "!!! Could not find any Zip Backup file to restore !!!"
-        echo "Please copy zip Backup File to current directory to restore"
+    if [ ! -f "$zipFileBackupAnsible" ]; then 
         exit 1
     fi
 
@@ -32,7 +44,7 @@ function restoreAnsible() {
         setupStartNewAnsible
     fi
     
-    echo "Waiting 240s AWX Setup Database ..."
+    echo "Waiting 300s AWX Setup Database ..."
     sleep 300
 
 
@@ -40,7 +52,7 @@ function restoreAnsible() {
     containerAWXPostgres=$(docker ps | grep postgres | awk '{print $1}')
 
     #Extract zip backup Ansible
-    gunzip -k $zipFileBackupAnsible
+    gunzip -kf $zipFileBackupAnsible
 
     #Get filename backup Ansible after unzip
     sqlFile=$(ls | grep $zipFileBackupAnsible | cut -d "." -f1-2)
@@ -71,6 +83,8 @@ case "$choice" in
     exit 1
     ;;
 esac
+
+
 
 
 

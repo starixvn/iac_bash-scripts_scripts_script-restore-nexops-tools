@@ -5,7 +5,7 @@ DATABASES = {
         'NAME': "ansibledb",
         'USER': "awx",
         'PASSWORD': "1234aa",
-        'HOST': "ansible-run-postgres",
+        'HOST': "10.19.10.90",
         'PORT': "5439",
     }
 }
