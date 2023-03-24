@@ -1,0 +1,131 @@
+version: '3.5'
+services:
+  web_new:
+    image: hub.nexdev.net/base/awx/web:11.2.0 #ansible/awx_web:11.0.0
+    ports:
+      - '8882:8052'
+    user: root
+    networks:
+      - swarm_nexops
+    volumes:
+      - supervisor-socket-new:/var/run/supervisor
+      - rsyslog-socket-new:/var/run/awx-rsyslog/
+      - rsyslog-config-new:/var/lib/awx/rsyslog/
+      - './SECRET_KEY:/etc/tower/SECRET_KEY'
+      - './environment.sh:/etc/tower/conf.d/environment.sh'
+      - './credentials.py:/etc/tower/conf.d/credentials.py'
+      - './nginx.conf:/etc/nginx/nginx.conf:ro'
+      - './redis_socket:/var/run/redis/:rw'
+      - './memcached_socket:/var/run/memcached/:rw'
+      - './projects:/var/lib/awx/projects:rw'
+      - '/etc/localtime:/etc/localtime:ro'
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.AWX == yes
+    environment:
+      http_proxy:
+      https_proxy:
+      no_proxy:
+
+  task_new:
+    image: hub.nexdev.net/base/awx/task:11.2.0-backup #ansible/awx_task:11.0.0
+    hostname: awx
+    user: root
+    networks:
+      - swarm_nexops
+    volumes:
+      - supervisor-socket-new:/var/run/supervisor
+      - rsyslog-socket-new:/var/run/awx-rsyslog/
+      - './krb5.conf:/etc/krb5.conf'
+      - './SECRET_KEY:/etc/tower/SECRET_KEY'
+      - './.ssh:/root/.ssh'
+      - './environment.sh:/etc/tower/conf.d/environment.sh'
+      - './credentials.py:/etc/tower/conf.d/credentials.py'
+      - './redis_socket:/var/run/redis/:rw'
+      - './memcached_socket:/var/run/memcached/:rw'
+      - './projects:/var/lib/awx/projects:rw'
+      - '/etc/localtime:/etc/localtime:ro'
+    environment:
+      http_proxy:
+      https_proxy:
+      no_proxy:
+      SUPERVISOR_WEB_CONFIG_PATH: '/supervisor.conf'
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.AWX == yes
+
+  redis_new:
+    image: hub.nexdev.net/base/nexops-tools/redis:5
+    environment:
+      http_proxy:
+      https_proxy:
+      no_proxy:
+    command: ['/usr/local/etc/redis/redis.conf']
+    volumes:
+      - './redis.conf:/usr/local/etc/redis/redis.conf:rw'
+      - './redis_socket:/var/run/redis/:rw'
+      - './memcached_socket:/var/run/memcached/:rw'
+    networks:
+      - swarm_nexops
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.AWX == yes
+
+  memcached_new:
+    image: hub.nexdev.net/base/awx/memcached:alpine
+    command: ['-s', '/var/run/memcached/memcached.sock', '-a', '0666']
+    environment:
+      http_proxy:
+      https_proxy:
+      no_proxy:
+    volumes:
+      - './memcached_socket:/var/run/memcached/:rw'
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.AWX == yes
+
+  postgres_new:
+    image: hub.nexdev.net/base/awx/postgres:10
+    ports:
+      - 5439:5432
+    volumes:
+      - './pg_data:/var/lib/postgresql/data/pgdata'
+    networks:
+      - swarm_nexops
+    environment:
+      POSTGRES_USER: awx
+      POSTGRES_PASSWORD: 1234aa
+      POSTGRES_DB: ansibledb
+      PGDATA: /var/lib/postgresql/data/pgdata
+      http_proxy:
+      https_proxy:
+      no_proxy:
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.AWX == yes
+
+networks:
+  swarm_nexops:
+     external: true
+
+volumes:
+  supervisor-socket-new:
+  rsyslog-socket-new:
+  rsyslog-config-new:
+
+
