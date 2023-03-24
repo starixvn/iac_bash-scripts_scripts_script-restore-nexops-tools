@@ -16,6 +16,7 @@ function setupStartNewAnsible () {
 }
 
 function getBackupZipfile () {
+    harborType=$1
     echo "############# Download latest backupfile from FTPD##########"
 
     checkConnection=$(nc -zv ftpd-backup.nexdev.net 2023 -w 1  > /dev/null 2>&1)
@@ -37,6 +38,8 @@ function getBackupZipfile () {
     sed -i "s/ftpd-user/$ftpdUser/g" getLatestbackupfile.py
     sed -i "s/ftpd-password/$ftpdPass/g" getLatestbackupfile.py
     sed -i "s/envOfBackupFile/$env/g" getLatestbackupfile.py
+    sed -i "s/toolName/$harborType/g" getLatestbackupfile.py
+
     python3 getLatestbackupfile.py
     if [[ $? -ne 0 ]]; then
         exit 1
