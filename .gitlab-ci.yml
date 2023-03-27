@@ -1,0 +1,7 @@
+image: hub.nexdev.net/base/alpine:3.17.2
+
+
+
+package-directory-script:
+  script: 
+    - echo "$CI_COMMIT_SHA"
