@@ -10,7 +10,7 @@ package-directory-script:
       do
         zip -r ${dir}-script-install.zip $dir
         toolDirZipper=${dir}-script-install.zip
-        # lftp -e 'set ssl:verify-certificate no; set ftp:ssl-allow true; set ftp:ssl-force true; put $toolDirZipper -o /awx-tower/$toolDirZipper; quit' -u 'nexops,R_v4FyaGRC_Kf4D' 'ftp://ftpd-backup.nexdev.net:2023'
+        lftp -e 'set ssl:verify-certificate no; set ftp:ssl-allow true; set ftp:ssl-force true; put $toolDirZipper -o /awx-tower/$toolDirZipper; quit' -u 'nexops,R_v4FyaGRC_Kf4D' 'ftp://ftpd-backup.nexdev.net:2023'
         rm -rf $toolDirZipper
       done
 
