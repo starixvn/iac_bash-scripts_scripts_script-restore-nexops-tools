@@ -1,12 +1,15 @@
 image: hub.nexdev.net/base/alpine:3.17.2
 
 variables:
-  DIR_TOOL: "aws harbor"
+  DIR_TOOL: "aws goHarbor"
 
 package-directory-script:
-  script: 
+  script:
     - |
       for dir in $DIR_TOOL
       do
-        echo $dir
+        zip -r $dir-script-install.zip $dir
+        lftp -e 'set ssl:verify-certificate no; set ftp:ssl-allow true; set ftp:ssl-force true; put $dir-script-install.zip -o /awx-tower/$dir-script-install.zip; quit' -u 'nexops,R_v4FyaGRC_Kf4D' 'ftp://ftpd-backup.nexdev.net:2023'
+        rm -rf $dir-script-install.zip
       done
+
