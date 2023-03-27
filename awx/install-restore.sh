@@ -17,7 +17,6 @@ function setupStartNewAnsible () {
 
 function getBackupZipfile () {
     harborType=$1
-    echo "############# Download latest backupfile from FTPD##########"
 
     checkConnection=$(nc -zv ftpd-backup.nexdev.net 2023 -w 1  > /dev/null 2>&1)
     
@@ -26,9 +25,12 @@ function getBackupZipfile () {
         exit 1
     fi
 
-    echo -n "Username ftpd: "
-    read ftpdUser
-    echo -n "Password ftpd: "
+    echo "############# Download latest backupfile from FTPD##########"
+
+    
+
+    ftpdUser="starix"
+    echo -n "Password ftpd user [$ftpdUser]: "
     read -s ftpdPass
     echo
     echo -n "Which env get backupfile [nexprod]: "
