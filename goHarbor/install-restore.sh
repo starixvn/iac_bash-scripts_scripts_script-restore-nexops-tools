@@ -12,8 +12,9 @@ function getBackupZipfile () {
 
     echo "############# Download latest backupfile from FTPD ##########"
 
-    ftpdUser="starix"
     env="local"
+    echo -n "User ftpd: "
+    read ftpdUser
     echo -n "Password ftpd user $ftpdUser: "
     read -s ftpdPass
     echo
