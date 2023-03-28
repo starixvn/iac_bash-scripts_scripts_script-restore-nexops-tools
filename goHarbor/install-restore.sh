@@ -1,40 +1,6 @@
 #!/usr/bin/env bash
 
 
-function installNewHarbor () {
-    getZipHarborInstall
-    echo "First setup to install goHarbor Registry !!!"
-    echo -n "IP Server run Harbor: "
-    read ip
-    echo -n "Port run Harbor: "
-    read port
-    echo -n "External domain HabroRegistry: "
-    read domain
-
-    #backup harbor.yml
-    cp harbor.yml.ori harbor.yml
-    pathInHarborfile=$(cat harbor.yml | grep -E "data_volume:" |  cut -d " " -f2)
-    echo -n "Full path data volume save registry[$pathInHarborfile]: "
-    read pathNew
-    pathNew=${pathNew:-$pathInHarborfile}
-    sed -i "s|$pathInHarborfile|$pathNew|g" harbor.yml
-    sed -i "s/goHarborHost/$ip/g" harbor.yml
-    sed -i "s/goHarborPort/$port/g" harbor.yml
-    sed -i "s/harborDomain/$domain/g" harbor.yml
-
-
-    echo "Install Harbor Registry..."
-    chmod +x prepare
-    bash install.sh --with-trivy
-
-    while ! healthCheckHarbor "$ip"; do
-        echo "Waiting harbor starting ...$state"
-        sleep 1
-    done
-    echo "goHarbor start successfully !!!"
-}
-
-
 function getBackupZipfile () {
     harborType=$1
     checkConnection=$(nc -zv ftpd-backup.nexdev.net 2023 -w 1  > /dev/null 2>&1)
@@ -118,7 +84,9 @@ function restoreHarborConfig () {
     chmod +x prepare
     bash install.sh --with-trivy
 
-    while ! healthCheckHarbor "$ip"; do
+    sleep 5
+
+    while ! healthCheckHarbor "$newIP"; do
         echo "Waiting harbor starting ...$state"
         sleep 1
     done
@@ -136,12 +104,13 @@ function restoreHarborConfig () {
     # Restore Data Secret
     cp -r secret/* $pathNew/secret/
 
-    echo "Done restoredb"
+    echo "######### Done restoredb ###############"
+
     cleanup
 
     state=$(healthCheckHarbor "$newIP")
 
-    while ! healthCheckHarbor "$ip"; do
+    while ! healthCheckHarbor "$newIP"; do
         echo "Waiting harbor starting ...$state"
         sleep 1
     done
@@ -223,22 +192,20 @@ function healthCheckHarbor () {
     ipHarbor=$1
     state=$(curl -s http://$ipHarbor:5055/api/v2.0/health | jq -r ".status")
     if [[ ! $state == "healthy" ]]; then
-        echo false
+        return 1
     else
-        echo true
+        return 0
     fi
 }
 
 
 function cleanup () {
-    echo -n "Cleanup after install"
-    echo
+
     rm -rf db secret redis 
     rm -rf *.gz
     rm -rf getLatestbackupfile.py
     rm -rf *.zip
-    echo -n "Done cleanup !!!"
-    echo
+    echo  "Done cleanup !!!"
 }
 
 apt install jq -y
@@ -247,9 +214,9 @@ clear
 
 echo "Enter your choice to deploy goHarbor
 
-1. Install New Harbor
-2. Install Harbor with Harbor-Config backup data
-3. Restore Harbor-Registry-Image backup data
+1. Install Harbor with Harbor-Config backup data
+2. Restore Harbor-Registry-Image backup data
+
 "
 echo -n "Your choice: "
 read choice
@@ -257,11 +224,9 @@ read choice
 
 
 case "$choice" in
-    1) installNewHarbor
+    1) restoreHarborConfig
     ;;
-    2) restoreHarborConfig
-    ;;
-    3) restoreHarborRegistryImage
+    2) restoreHarborRegistryImage
     ;;
     *) echo "Wrong option"
     exit 1
