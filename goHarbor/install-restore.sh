@@ -121,35 +121,26 @@ function restoreHarborConfig () {
 
 function restoreHarborRegistryImage () {
 
-    getZipHarborInstall
-
-    #command to list HarborRegistry
-    getBackupZipfile "harbor-registry"
-
     commandCheckHaborRunning=$(docker ps | grep harbor)
-
     if [[ $? -ne 0 ]]; then
+        echo "Harbor not running, Please start goHarbor first"
         exit 1
     fi
 
 
+
     ls *harborRegistry*zip 1> /dev/null 2>&1
     if  [[ $? != 0 ]] ; then
-        echo "Cannot find any Zip file backup HarborRegistry"
-    else
-        harborRegistryZip=$(ls | grep -E "*harborRegistry*")
+        #command to list HarborRegistry
+        getBackupZipfile "harbor-registry"
+
     fi
 
-
+    harborRegistryZip=$(ls | grep -E "*harborRegistry*")
     pathInHarborfile=$(cat harbor.yml | grep -E "data_volume:" |  cut -d " " -f2)
-    echo -n "Full path data volume save registry[$pathInHarborfile]: "
-    read pathNew
-    pathNew=${pathNew:-$pathInHarborfile}
 
-    
     echo "Script will restore registry data !!!"
-    sleep 10
-    unzip -o $harborRegistryZip -d $pathNew
+    unzip -o $harborRegistryZip -d $pathInHarborfile
 
     echo "Done restore Registry"
     cleanup
