@@ -242,6 +242,8 @@ function cleanup () {
     echo
 }
 
+apt install jq -y
+
 echo "Enter your choice to deploy goHarbor
 
 1. Install New Harbor
