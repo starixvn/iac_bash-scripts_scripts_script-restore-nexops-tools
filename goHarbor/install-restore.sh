@@ -243,7 +243,7 @@ function cleanup () {
 
 apt install jq -y
 
-clean
+clear
 
 echo "Enter your choice to deploy goHarbor
 
