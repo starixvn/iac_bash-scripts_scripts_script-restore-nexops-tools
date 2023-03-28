@@ -10,34 +10,28 @@ function installNewHarbor () {
     read port
     echo -n "External domain HabroRegistry: "
     read domain
-    echo -n "Full path save data registry Harbor: "
-    read path
 
     #backup harbor.yml
     cp harbor.yml.ori harbor.yml
-
+    pathInHarborfile=$(cat harbor.yml | grep -E "data_volume:" |  cut -d " " -f2)
+    echo -n "Full path data volume save registry[$pathInHarborfile]: "
+    read pathNew
+    pathNew=${pathNew:-$pathInHarborfile}
+    sed -i "s|$pathInHarborfile|$pathNew|g" harbor.yml
     sed -i "s/goHarborHost/$ip/g" harbor.yml
     sed -i "s/goHarborPort/$port/g" harbor.yml
-    sed -i "s|goHarborVolumePath|$path|g" harbor.yml
     sed -i "s/harborDomain/$domain/g" harbor.yml
 
-
-    
-    if [[ ! -d $path ]]; then
-        echo "Path to save data you type not exist, Script will create ..."
-        mkdir -p "$path"
-    fi
 
     echo "Install Harbor Registry..."
     chmod +x prepare
     bash install.sh --with-trivy
 
-    state=$(healthCheckHarbor "$ip")
-
-    while [ $state ]; do
-        echo "Waiting harbor starting ..."
+    while ! healthCheckHarbor "$ip"; do
+        echo "Waiting harbor starting ...$state"
         sleep 1
     done
+    echo "goHarbor start successfully !!!"
 }
 
 
@@ -124,8 +118,11 @@ function restoreHarborConfig () {
     chmod +x prepare
     bash install.sh --with-trivy
 
-    echo "Waiting goHarbor start succesfully !!!"
-    sleep 120
+    while ! healthCheckHarbor "$ip"; do
+        echo "Waiting harbor starting ...$state"
+        sleep 1
+    done
+
     # Restore config goHarbor Registry
     docker exec -i harbor-db pg_restore -U postgres -d registry -c < db/registry.tar
     docker exec -i harbor-db pg_restore -U postgres -d postgres -c < db/postgres.tar
@@ -144,10 +141,12 @@ function restoreHarborConfig () {
 
     state=$(healthCheckHarbor "$newIP")
 
-    while [ $state ]; do
-        echo "Waiting harbor starting ..."
+    while ! healthCheckHarbor "$ip"; do
+        echo "Waiting harbor starting ...$state"
         sleep 1
     done
+    echo 
+    echo "####### goHarbor start successfully !!! ############"
 }
 
 
@@ -243,6 +242,8 @@ function cleanup () {
 }
 
 apt install jq -y
+
+clean
 
 echo "Enter your choice to deploy goHarbor
 

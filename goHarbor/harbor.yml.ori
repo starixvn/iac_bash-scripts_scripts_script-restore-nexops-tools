@@ -44,8 +44,7 @@ database:
   max_open_conns: 900
 
 # The default data volume
-# data_volume: /var/www/nexops/harbor/data
-data_volume: goHarborVolumePath
+data_volume: /data
 #/data
 
 # Harbor Storage settings by default is using /data dir on local filesystem
