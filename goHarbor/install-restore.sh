@@ -47,7 +47,7 @@ function getBackupZipfile () {
 
     ftpdUser="starix"
     env="local"
-    echo -n "Password ftpd user [$ftpdUser]: "
+    echo -n "Password ftpd user $ftpdUser: "
     read -s ftpdPass
     echo
     echo -n "Which env get backupfile [local]: "
@@ -182,7 +182,7 @@ function getZipHarborInstall () {
     pathFile="/goHarbor"
     patternRegex="/envOfBackupFile/toolName"
     echo 
-    echo -n "Password ftpd user [$ftpdUser]: "
+    echo -n "Password ftpd user $ftpdUser: "
     read -s ftpdPass
     echo
 

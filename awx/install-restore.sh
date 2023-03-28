@@ -30,7 +30,7 @@ function getBackupZipfile () {
     
 
     ftpdUser="starix"
-    echo -n "Password ftpd user [$ftpdUser]: "
+    echo -n "Password ftpd user $ftpdUser: "
     read -s ftpdPass
     echo
     echo -n "Which env get backupfile [nexprod]: "
