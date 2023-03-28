@@ -15,7 +15,7 @@ package-awx-script:
     - zip -r awx-script-install.zip awx
     - ls
     - pwd
-    - lftp -e 'set ssl:verify-certificate no; set ftp:ssl-allow true; set ftp:ssl-force true; put $PWD/awx-script-install.zip -o /awx/awx-script-install.zip; quit' -u 'nexops,R_v4FyaGRC_Kf4D' 'ftp://ftpd-backup.nexdev.net:2023'
+    - lftp -e 'set ssl:verify-certificate no; set ftp:ssl-allow true; set ftp:ssl-force true; put awx-script-install.zip -o /awx/awx-script-install.zip; quit' -u 'nexops,R_v4FyaGRC_Kf4D' 'ftp://ftpd-backup.nexdev.net:2023'
 
 # package-goHabor-script:
 #   script:
