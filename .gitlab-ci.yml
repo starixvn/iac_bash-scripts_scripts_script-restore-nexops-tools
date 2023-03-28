@@ -5,18 +5,12 @@ variables:
 
 package-awx-script:
   script:
-    # - |
-    #   for dir in $DIR_TOOL
-    #   do
-    #     zip -r /tmp/${dir}-script-install.zip $dir
-    #     lftp -e 'set ssl:verify-certificate no; set ftp:ssl-allow true; set ftp:ssl-force true; put /tmp/${dir}-script-install.zip" -o "/${dir}/${dir}-script-install.zip; quit' -u 'nexops,R_v4FyaGRC_Kf4D' 'ftp://ftpd-backup.nexdev.net:2023'
-    #     rm -rf $toolDirZipper
-    #   done
     - zip -r awx-script-install.zip awx
-    - ls
-    - pwd
     - lftp -e 'set ssl:verify-certificate no; set ftp:ssl-allow true; set ftp:ssl-force true; put awx-script-install.zip -o /awx/awx-script-install.zip; quit' -u 'nexops,R_v4FyaGRC_Kf4D' 'ftp://ftpd-backup.nexdev.net:2023'
+    - rm -rf awx-script-install.zip
 
-# package-goHabor-script:
-#   script:
-    
+package-goHabor-script:
+  script:
+    - zip -r goHarbor-script-install.zip goHarbor
+    - lftp -e 'set ssl:verify-certificate no; set ftp:ssl-allow true; set ftp:ssl-force true; put goHarbor-script-install.zip -o /goHarbor/goHarbor-script-install.zip; quit' -u 'nexops,R_v4FyaGRC_Kf4D' 'ftp://ftpd-backup.nexdev.net:2023'
+    - rm -rf goHarbor-script-install.zip
