@@ -31,6 +31,13 @@ function installNewHarbor () {
     echo "Install Harbor Registry..."
     chmod +x prepare
     bash install.sh --with-trivy
+
+    state=$(healthCheckHarbor "$ip")
+
+    while [ $state ]; do
+        echo "Waiting harbor starting ..."
+        sleep 1
+    done
 }
 
 
@@ -88,7 +95,7 @@ function restoreHarborConfig () {
     urlHarbor=$(cat harbor.yml | grep external_url | sed -n 2p | cut -d " " -f2 |cut -d '"' -f2)
     #sleep 3
 
-    echo -n "Server Run goHarbor[$ipServerRunHarbor]: "
+    echo -n "IP Server Run goHarbor[$ipServerRunHarbor]: "
     read newIP
     newIP=${newIP:-$ipServerRunHarbor}
     sed -i "s|$ipServerRunHarbor|$newIP|g" harbor.yml
@@ -134,6 +141,13 @@ function restoreHarborConfig () {
 
     echo "Done restoredb"
     cleanup
+
+    state=$(healthCheckHarbor "$newIP")
+
+    while [ $state ]; do
+        echo "Waiting harbor starting ..."
+        sleep 1
+    done
 }
 
 
@@ -159,6 +173,11 @@ function restoreHarborRegistryImage () {
     fi
 
 
+    pathInHarborfile=$(cat harbor.yml | grep -E "data_volume:" |  cut -d " " -f2)
+    echo -n "Full path data volume save registry[$pathInHarborfile]: "
+    read pathNew
+    pathNew=${pathNew:-$pathInHarborfile}
+
     
     echo "Script will restore registry data !!!"
     sleep 10
@@ -179,7 +198,7 @@ function getZipHarborInstall () {
     fi
 
     ftpdUser="nexops"
-    pathFile="/goHarbor"
+    pathFile="/goHarbor/InstallZip"
     patternRegex="/envOfBackupFile/toolName"
     echo 
     echo -n "Password ftpd user $ftpdUser: "
@@ -201,6 +220,17 @@ function getZipHarborInstall () {
     echo
 }
 
+function healthCheckHarbor () {
+    ipHarbor=$1
+    state=$(curl -s http://$ipHarbor:5055/api/v2.0/health | jq -r ".status")
+    if [[ ! $state == "healthy" ]]; then
+        echo false
+    else
+        echo true
+    fi
+}
+
+
 function cleanup () {
     echo -n "Cleanup after install"
     echo
@@ -216,7 +246,7 @@ echo "Enter your choice to deploy goHarbor
 
 1. Install New Harbor
 2. Install Harbor with Harbor-Config backup data
-3. Install Harbor with Harbor-Registry-Image backup data
+3. Restore Harbor-Registry-Image backup data
 "
 echo -n "Your choice: "
 read choice
@@ -234,5 +264,8 @@ case "$choice" in
     exit 1
     ;;
 esac
-#testing ci
+
+
+
+
 
