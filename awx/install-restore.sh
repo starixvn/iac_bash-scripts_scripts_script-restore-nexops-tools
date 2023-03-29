@@ -51,6 +51,12 @@ function getBackupZipfile () {
 
 function installNewAnsible () {
     setupStartNewAnsible
+    while ! healthcheckAWX "$ipAWX" ; do
+        echo "Still waiting ... Code respone now $responeCode"
+        sleep 5
+    done
+    echo "Ansible Start Successfully !!!"
+    echo "#####################################################" 
 }
 
 function restoreAnsible() {
@@ -69,9 +75,16 @@ function restoreAnsible() {
         sleep 1
     done
 
-    echo "Waiting 300s AWX Setup Database ..."
-    sleep 300
+    echo "Wating Ansible AWX starting ..."
+    
+    while ! healthcheckAWX "$ipAWX" ; do
+        echo "Still waiting ... Code respone now $responeCode"
+        sleep 5
+    done
 
+    echo "Ansible Start Successfully !!! Script will restore db"
+    echo "#####################################################"
+    sleep 2
 
     #Get container ID
     containerAWXPostgres=$(docker ps | grep postgres | awk '{print $1}')
@@ -98,14 +111,28 @@ function cleanupAfterRestore () {
     # cleanup file get latest bk file
     rm -rf getLatestbackupfile.py
 
-    echo "Done clean-up !!!"
+    echo "Done cleanup !!!"
 }
+
+
+
+function healthcheckAWX () {
+    ipAWX=$1
+    responeCode=$(curl -s -o /dev/null -w "%{http_code}" -k http://$ipAWX:8882/api/v2/ping/ )
+
+    if [[ $responeCode -ne "200" ]]; then
+        return 1
+    else
+        return 0
+    fi
+}
+
 
 
 echo  "Enter your choice to deploy Ansible
 
 1. Install New Ansible
-2. Install New Ansible and Restore Ansible with backup zip file
+2. Install Ansible with backup data zip file
 "
 echo -n "Your choice: "
 read choice

@@ -2,3 +2,9 @@ goHarbor/harbor.v2.5.0.tar.gz
 goHarbor/common
 goHarbor/harbor.yml
 awx/credentials.py
+awx/getLatestbackupfile.py
+goHarbor/getLatestbackupfile.py
+**/*.gz
+**/*.zip
+
+
