@@ -8,7 +8,7 @@ function connectionToRegistry () {
     if [[ ! $state == "healthy" ]]; then
         echo "Connection to hub.nexdev.net             [FAILED]"
     else
-        echo "Connection to hub.nexdev.net             [SUCCESSED]"
+        echo "Connection to hub.nexdev.net             [SUCCEED]"
     fi
 }
 
@@ -20,7 +20,7 @@ function connectionToFTPD () {
     if [[ $? -ne 0 ]]; then
         echo "Connection to ftpd.backup.nexdev.net     [FAILED]"
     else
-        echo "Connection to ftpd.backup.nexdev.net     [SUCCESSED]"
+        echo "Connection to ftpd.backup.nexdev.net     [SUCCEED]"
     fi
 }
 
