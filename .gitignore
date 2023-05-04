@@ -6,5 +6,6 @@ awx/getLatestbackupfile.py
 goHarbor/getLatestbackupfile.py
 **/*.gz
 **/*.zip
+.history
 
 
