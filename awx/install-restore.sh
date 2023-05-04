@@ -71,7 +71,7 @@ function restoreAnsible() {
         setupStartNewAnsible
     fi
     
-    until [[ $(docker ps | grep postgres) ]]; do
+    until [[ $(docker ps | grep awx_postgres) ]]; do
         sleep 1
     done
 
@@ -87,7 +87,7 @@ function restoreAnsible() {
     sleep 2
 
     #Get container ID
-    containerAWXPostgres=$(docker ps | grep postgres | awk '{print $1}')
+    containerAWXPostgres=$(docker ps | grep awx_postgres | awk '{print $1}')
 
     #Extract zip backup Ansible
     gunzip -kf $zipFileBackupAnsible
