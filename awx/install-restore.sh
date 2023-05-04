@@ -136,6 +136,7 @@ echo  "Enter your choice to deploy Ansible
 "
 echo -n "Your choice: "
 read choice
+#
 
 
 case "$choice" in
