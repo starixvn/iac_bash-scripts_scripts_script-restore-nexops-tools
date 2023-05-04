@@ -25,21 +25,23 @@ function connectionToFTPD () {
 }
 
 function checkDockerInstalled () {
-    commandCheck=$(docker version --format '{{.Server.Version}}')
+    commandCheck=$(docker version > /dev/null 2>&1)
     if [[ $? -ne 0 ]]; then
         echo "Check DockerEngine installed  ... [no]"
     else
-        echo "Check DockerEngine installed  ... [yes] - version $commandCheck"
+        version=$(docker version --format '{{.Server.Version}}' )
+        echo "Check DockerEngine installed  ... [yes] - version $version"
     fi
     
 }
 
 function checkDockerComposeInstalled () {
-    commandCheck=$(docker-compose --version | awk '{print $3}' | sed  "s/,//g")
+    commandCheck=$(docker-compose --version > /dev/null 2>&1)
     if [[ $? -ne 0 ]]; then
         echo "Check DockerCompose installed ... [no]"
     else
-        echo "Check DockerCompose installed ... [yes] - version $commandCheck"
+        version=$(docker-compose --version | awk '{print $3}' | sed  "s/,//g")
+        echo "Check DockerCompose installed ... [yes] - version $version"
     fi
 }
 
