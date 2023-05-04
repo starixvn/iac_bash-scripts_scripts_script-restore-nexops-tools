@@ -3,10 +3,8 @@
 
 
 function connectionToRegistry () {
-    #apt update && apt install jq -y
     url="https://hub.nexdev.net/api/v2.0/health"
     state=$(curl -s $url | jq -r ".status")
-    clear
     if [[ ! $state == "healthy" ]]; then
         echo "Connection to hub.nexdev.net             [FAILED]"
     else
@@ -26,7 +24,33 @@ function connectionToFTPD () {
     fi
 }
 
+function checkDockerInstalled () {
+    commandCheck=$(docker version --format '{{.Server.Version}}')
+    if [[ $? -ne 0 ]]; then
+        echo "Check DockerEngine installed  ... [no]"
+    else
+        echo "Check DockerEngine installed  ... [yes] - version $commandCheck"
+    fi
+    
+}
+
+function checkDockerComposeInstalled () {
+    commandCheck=$(docker-compose --version | awk '{print $3}' | sed  "s/,//g")
+    if [[ $? -ne 0 ]]; then
+        echo "Check DockerCompose installed ... [no]"
+    else
+        echo "Check DockerCompose installed ... [yes] - version $commandCheck"
+    fi
+}
 
 
+apt update && apt install jq -y
+clear
+echo "######################### Check connection ########################"
 connectionToRegistry
 connectionToFTPD
+echo
+echo "############ Check Docker & DockerCompose Installed ################"
+checkDockerInstalled
+checkDockerComposeInstalled
+

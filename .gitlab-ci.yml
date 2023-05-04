@@ -6,6 +6,7 @@ package-awx-script:
     changes:
       - awx/*
   script:
+    - cp *.sh awx
     - zip -P 1qaz@WSX -r awx-script-install.zip awx
     - lftp -e 'set ssl:verify-certificate no; set ftp:ssl-allow true; set ftp:ssl-force true; put awx-script-install.zip -o /awx/awx-script-install.zip; quit' -u 'nexops,R_v4FyaGRC_Kf4D' 'ftp://ftpd-backup.nexdev.net:2023'
     - rm -rf awx-script-install.zip
@@ -15,6 +16,9 @@ package-goHabor-script:
     changes:
       - goHarbor/*
   script:
+    - cp *.sh goHarbor
     - zip -P 1qaz@WSX -r goHarbor-script-install.zip goHarbor
     - lftp -e 'set ssl:verify-certificate no; set ftp:ssl-allow true; set ftp:ssl-force true; put goHarbor-script-install.zip -o /goHarbor/goHarbor-script-install.zip; quit' -u 'nexops,R_v4FyaGRC_Kf4D' 'ftp://ftpd-backup.nexdev.net:2023'
     - rm -rf goHarbor-script-install.zip
+
+
